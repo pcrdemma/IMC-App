@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculateur IMC - Cloud App</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Calculateur d'IMC</h1>
+        <p class="subtitle">Application Cloud - Indice de Masse Corporelle</p>
+
+        <form id="imcForm">
+            <label>Nom (optionnel)</label>
+            <input type="text" id="nom" placeholder="Votre nom">
+
+            <label>Poids (kg)</label>
+            <input type="number" id="poids" step="0.1" required placeholder="Ex: 70">
+
+            <label>Taille (cm)</label>
+            <input type="number" id="taille" step="0.1" required placeholder="Ex: 175">
+
+            <button type="submit">Calculer mon IMC</button>
+        </form>
+
+        <div id="resultat" class="resultat hidden">
+            <h2>Résultat</h2>
+            <p id="valeurImc"></p>
+            <p id="categorieImc"></p>
+        </div>
+
+        <hr>
+        <button id="btnHistorique">📊 Afficher l'historique</button>
+        <div id="historiqueContainer"></div>
+    </div>
+
+    <script>
+        document.getElementById('imcForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const nom = document.getElementById('nom').value;
+            const poids = document.getElementById('poids').value;
+            const taille = document.getElementById('taille').value;
+
+            const response = await fetch('/calculer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nom, poids, taille })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                document.getElementById('valeurImc').innerText = `Votre IMC : ${data.imc}`;
+                document.getElementById('categorieImc').innerText = `Catégorie : ${data.categorie}`;
+                document.getElementById('resultat').classList.remove('hidden');
+            } else {
+                alert(data.erreur);
+            }
+        });
+
+        document.getElementById('btnHistorique').addEventListener('click', async function() {
+            const response = await fetch('/historique');
+            const data = await response.json();
+            let html = '<table><tr><th>Nom</th><th>Poids</th><th>Taille</th><th>IMC</th><th>Catégorie</th><th>Date</th></tr>';
+            data.forEach(row => {
+                html += `<tr>
+                    <td>${row.nom}</td>
+                    <td>${row.poids} kg</td>
+                    <td>${row.taille} cm</td>
+                    <td>${row.imc}</td>
+                    <td>${row.categorie}</td>
+                    <td>${row.date_calcul}</td>
+                </tr>`;
+            });
+            html += '</table>';
+            document.getElementById('historiqueContainer').innerHTML = html;
+        });
+    </script>
+</body>
+</html>
