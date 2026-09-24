@@ -1,12 +1,19 @@
-FROM python:3.11-slim
+# Image de base Node.js
+FROM node:18-alpine
 
+# Répertoire de travail
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copier les fichiers
+COPY package*.json ./
+COPY server.js ./
+COPY public ./public
 
-COPY . .
+# Installer les dépendances
+RUN npm install --production
 
-EXPOSE 5000
+# Exposer le port
+EXPOSE 3000
 
-CMD ["python", "app.py"]
+# Démarrer l'application
+CMD ["npm", "start"]

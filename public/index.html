@@ -6,7 +6,7 @@
 <title>IMC Calculator | Calculez votre indice de masse corporelle</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="static/style.css">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -25,8 +25,8 @@
         <span class="brand-name">IMC<span class="brand-accent">Calc</span></span>
       </div>
       <nav class="header-nav">
-        <a href="#" class="nav-link active">Accueil</a>
-        <a href="#calculateur" class="nav-link">Calculateur</a>
+        <!-- <a href="#" class="nav-link active">Accueil</a> -->
+        <!-- <a href="#calculateur" class="nav-link">Calculateur</a> -->
       </nav>
     </div>
   </header>
@@ -117,6 +117,35 @@
       </div>
     </div>
 
+    <!-- ========== HISTORIQUE SECTION ========== -->
+    <section class="historique-section">
+      <div class="historique-header">
+        <h2>Historique de vos calculs</h2>
+        <p>Consultez tous vos calculs d'IMC précédents</p>
+      </div>
+
+      <div class="table-wrapper">
+        <table id="historique-table" class="historique-table">
+          <thead>
+            <tr>
+              <th>Poids (kg)</th>
+              <th>Taille (cm)</th>
+              <th>IMC</th>
+              <th>Catégorie</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Les données seront insérées ici par script.js -->
+          </tbody>
+        </table>
+        <div id="empty-message" class="empty-message" style="display: none;">
+          📭 Aucun calcul pour le moment. Calculez votre IMC pour commencer !
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <footer class="site-footer">
@@ -139,6 +168,6 @@
     </div>
   </footer>
 
-  <script src="static/script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
