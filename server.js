@@ -47,7 +47,7 @@ app.get('/api/test', (req, res) => {
 app.post('/api/calculer-imc', async (req, res) => {
     try {
         const { poids, taille } = req.body;
-        console.log('📥 Reçu:', { poids, taille });
+        console.log('Reçu:', { poids, taille });
 
         if (!poids || !taille || poids <= 0 || taille <= 0) {
             return res.status(400).json({ 
@@ -107,7 +107,7 @@ app.get('/api/historique', async (req, res) => {
         );
         connection.release();
 
-        console.log('📊 Historique:', rows.length, 'calculs');
+        console.log('Historique:', rows.length, 'calculs');
         res.json({
             succes: true,
             donnees: rows
@@ -144,6 +144,6 @@ app.get('*', (req, res) => {
 // Démarrage du serveur
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
-    console.log(`📊 API disponible sur http://localhost:${PORT}/api`);
+    console.log(`Serveur lancé sur http://localhost:${PORT}`);
+    console.log(`API disponible sur http://localhost:${PORT}/api`);
 });
