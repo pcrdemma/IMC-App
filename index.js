@@ -1,17 +1,21 @@
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+const express = require('express');
+const path = require('path');
 
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
+const app = express();
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ succes: false, erreur: 'Méthode non autorisée' });
-  }
+// Serve static files from public folder
+app.use(express.static(path.join(__dirname, 'public')));
 
+// CORS
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
+
+// API routes
+app.post('/api/calculer-imc', (req, res) => {
   const { poids, taille } = req.body;
 
   if (!poids || !taille || poids <= 0 || taille <= 0) {
@@ -53,4 +57,21 @@ export default async function handler(req, res) {
       date: new Date().toLocaleString('fr-FR')
     }
   });
-}
+});
+
+app.get('/api/historique', (req, res) => {
+  res.status(200).json({
+    succes: true,
+    message: 'Historique géré par localStorage'
+  });
+});
+
+// Catch all - serve index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
