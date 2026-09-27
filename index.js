@@ -1,18 +1,13 @@
 const express = require('express');
 const path = require('path');
+const cors = require('cors');
 
 const app = express();
 
-// Serve static files from public folder
+// Middleware
+app.use(cors());
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-
-// CORS
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  next();
-});
 
 // API routes
 app.post('/api/calculer-imc', (req, res) => {
@@ -46,7 +41,7 @@ app.post('/api/calculer-imc', (req, res) => {
     couleur = "red";
   }
 
-  res.status(200).json({
+  res.json({
     succes: true,
     donnees: {
       poids,
@@ -60,18 +55,18 @@ app.post('/api/calculer-imc', (req, res) => {
 });
 
 app.get('/api/historique', (req, res) => {
-  res.status(200).json({
+  res.json({
     succes: true,
     message: 'Historique géré par localStorage'
   });
 });
 
-// Catch all - serve index.html
+// Catch all
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🚀 Server on port ${PORT}`);
 });
