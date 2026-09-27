@@ -1,11 +1,11 @@
 export default async function handler(req, res) {
-  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    res.status(200).end();
+    return;
   }
 
   if (req.method !== 'POST') {
@@ -43,7 +43,6 @@ export default async function handler(req, res) {
       couleur = "red";
     }
 
-    // Stocke en localStorage (côté front) - pas besoin de DB pour Vercel
     return res.status(200).json({
       succes: true,
       donnees: {
@@ -60,7 +59,7 @@ export default async function handler(req, res) {
     console.error('Erreur:', error);
     return res.status(500).json({
       succes: false,
-      erreur: 'Erreur serveur'
+      erreur: 'Erreur serveur: ' + error.message
     });
   }
 }

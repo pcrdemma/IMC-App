@@ -1,13 +1,13 @@
 // ========== IMC CALCULATOR - SCRIPT PRINCIPAL ==========
 
 // Configuration API
-const API_BASE = '/api';
+const API_BASE = window.location.origin + '/api';
 
 // ========== EVENT LISTENERS ==========
 
 document.addEventListener('DOMContentLoaded', function() {
   console.log('✅ Application chargée');
-  chargerHistorique();
+  chargerHistoriqueLocal();
 
   // Event listener sur le formulaire
   const form = document.getElementById('imc-form');
@@ -49,9 +49,26 @@ async function calculerIMC() {
     const data = await response.json();
 
     if (data.succes) {
-      afficherResultat(data.imc, data.categorie, data.couleur);
+      const imc = data.donnees.imc;
+      const categorie = data.donnees.categorie;
+      const couleur = data.donnees.couleur;
+      const date = data.donnees.date;
+
+      // Affiche le résultat
+      afficherResultat(imc, categorie, couleur);
+      
+      // Sauvegarde dans localStorage
+      sauvegarderHistoriqueLocal({
+        poids,
+        taille,
+        imc,
+        categorie,
+        couleur,
+        date
+      });
+
       viderFormulaireEnDouceur();
-      await chargerHistorique();
+      chargerHistoriqueLocal();
       afficherSucces('✅ IMC calculé avec succès !');
     } else {
       afficherErreur('❌ ' + (data.erreur || 'Erreur lors du calcul'));
@@ -60,6 +77,35 @@ async function calculerIMC() {
   } catch (error) {
     console.error('Erreur réseau:', error);
     afficherErreur('❌ Erreur de connexion au serveur. Vérifiez que le serveur est lancé.');
+  }
+}
+
+// ========== SAUVEGARDER DANS LOCALSTORAGE ==========
+
+function sauvegarderHistoriqueLocal(calcul) {
+  let historique = JSON.parse(localStorage.getItem('imc_historique')) || [];
+  
+  const nouveauCalcul = {
+    id: Date.now(),
+    ...calcul
+  };
+  
+  historique.unshift(nouveauCalcul); // Ajouter au début
+  historique = historique.slice(0, 50); // Garder max 50 calculs
+  
+  localStorage.setItem('imc_historique', JSON.stringify(historique));
+}
+
+// ========== CHARGER DEPUIS LOCALSTORAGE ==========
+
+function chargerHistoriqueLocal() {
+  const historique = JSON.parse(localStorage.getItem('imc_historique')) || [];
+  
+  if (historique.length > 0) {
+    afficherHistorique(historique);
+    document.getElementById('empty-message').style.display = 'none';
+  } else {
+    afficherHistoriqueVide();
   }
 }
 
@@ -109,31 +155,6 @@ function animer_aiguille(imc) {
   needle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
 }
 
-// ========== CHARGER L'HISTORIQUE ==========
-
-async function chargerHistorique() {
-  try {
-    const response = await fetch(`${API_BASE}/historique`);
-
-    if (!response.ok) {
-      throw new Error('Erreur chargement historique');
-    }
-
-    const data = await response.json();
-
-    if (data.succes && data.donnees && data.donnees.length > 0) {
-      afficherHistorique(data.donnees);
-      document.getElementById('empty-message').style.display = 'none';
-    } else {
-      afficherHistoriqueVide();
-    }
-
-  } catch (error) {
-    console.error('Erreur historique:', error);
-    afficherHistoriqueVide();
-  }
-}
-
 // ========== AFFICHER L'HISTORIQUE DANS LA TABLE ==========
 
 function afficherHistorique(donnees) {
@@ -144,14 +165,7 @@ function afficherHistorique(donnees) {
     const row = tbody.insertRow(index);
 
     // Formater la date
-    const date = new Date(calcul.date_calcul);
-    const dateStr = date.toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    const dateStr = calcul.date || new Date().toLocaleString('fr-FR');
 
     // Mapper couleur → classe badge
     const colorMap = {
@@ -189,29 +203,17 @@ function afficherHistoriqueVide() {
 
 // ========== SUPPRIMER UN CALCUL ==========
 
-async function supprimerCalcul(id) {
+function supprimerCalcul(id) {
   if (!confirm('Êtes-vous sûr de vouloir supprimer ce calcul ?')) {
     return;
   }
 
-  try {
-    const response = await fetch(`${API_BASE}/historique/${id}`, {
-      method: 'DELETE'
-    });
-
-    const data = await response.json();
-
-    if (data.succes) {
-      await chargerHistorique();
-      afficherSucces('✅ Calcul supprimé avec succès');
-    } else {
-      afficherErreur('❌ Erreur lors de la suppression');
-    }
-
-  } catch (error) {
-    console.error('Erreur suppression:', error);
-    afficherErreur('❌ Erreur de connexion');
-  }
+  let historique = JSON.parse(localStorage.getItem('imc_historique')) || [];
+  historique = historique.filter(calcul => calcul.id !== id);
+  
+  localStorage.setItem('imc_historique', JSON.stringify(historique));
+  chargerHistoriqueLocal();
+  afficherSucces('✅ Calcul supprimé avec succès');
 }
 
 // ========== VIDER LE FORMULAIRE ==========
